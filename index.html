@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Roblox Chat</title>
+  <style>
+    #chatbox {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #aaa;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Roblox Chat</h1>
+
+  <div id="chatbox"></div>
+
+  <div id="login">
+    <input id="usernameInput" placeholder="Your name">
+    <button onclick="setName()">Start</button>
+  </div>
+
+  <div id="controls" style="display:none;">
+    <input id="msgInput" placeholder="Type a message">
+    <button onclick="sendMsg()">Send</button>
+  </div>
+
+  <script>
+    const server = "https://YOUR_BACKEND.onrender.com"; // change this to your Render or Replit link
+
+    function setName() {
+      localStorage.setItem("username", document.getElementById("usernameInput").value);
+      document.getElementById("login").style.display = "none";
+      document.getElementById("controls").style.display = "block";
+    }
+
+    async function sendMsg() {
+      const msg = document.getElementById("msgInput").value;
+      const sender = localStorage.getItem("username");
+      await fetch(server + "/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender, message: msg })
+      });
+      document.getElementById("msgInput").value = "";
+    }
+
+    async function getMsgs() {
+      const res = await fetch(server + "/messages");
+      const data = await res.json();
+      document.getElementById("chatbox").innerHTML = data.map(m =>
+        `<p><b>${m.sender}:</b> ${m.message}</p>`).join("");
+    }
+
+    setInterval(getMsgs, 1000);
+  </script>
+</body>
+</html>
